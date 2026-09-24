@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flash Auto</title>
+<meta name="theme-color" content="#E9EDF1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121A22" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Flash Auto">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗞️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EDF1; --paper:#F7F9FA; --ink:#17222C; --muted:#5B6873; --line:#CDD5DC;
+  --petrol:#0B6480; --amber:#C98A00; --err:#A33A2A;
+  --r1:#0B6480; --r2:#3C7A4A; --r3:#8A5A12; --r4:#6A4C8C; --r5:#99405A; --r6:#40616E;
+  --sans:"Barlow Semi Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121A22; --paper:#18222C; --ink:#E6ECF0; --muted:#94A2AD; --line:#2B3947;
+    --petrol:#5DB3CF; --amber:#E6B23A; --err:#E07A66;
+    --r1:#5DB3CF; --r2:#7CC08A; --r3:#DDA85A; --r4:#B397D6; --r5:#E08AA4; --r6:#8FB3C1;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121A22; --paper:#18222C; --ink:#E6ECF0; --muted:#94A2AD; --line:#2B3947;
+  --petrol:#5DB3CF; --amber:#E6B23A; --err:#E07A66;
+  --r1:#5DB3CF; --r2:#7CC08A; --r3:#DDA85A; --r4:#B397D6; --r5:#E08AA4; --r6:#8FB3C1;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;min-height:100%}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--petrol);outline-offset:2px}
+.wrap{max-width:680px;margin:0 auto;padding:0 18px 48px}
+
+/* En-tête : la date comme élément fort */
+header.top{padding:22px 0 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.day{font-weight:700;font-size:clamp(2.6rem,11vw,3.6rem);line-height:.92;letter-spacing:-.01em;text-transform:lowercase}
+.day small{display:block;font-size:1.05rem;font-weight:500;color:var(--muted);letter-spacing:0;margin-top:8px;text-transform:none}
+.tools{display:flex;gap:8px;flex-shrink:0;margin-top:4px}
+.icon-btn{width:42px;height:42px;border-radius:21px;border:1px solid var(--line);background:var(--paper);display:grid;place-items:center}
+.icon-btn svg{width:20px;height:20px;stroke:var(--ink);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon-btn[disabled]{opacity:.45}
+.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* L'essentiel */
+.essentiel{background:var(--ink);color:var(--paper);border-radius:14px;padding:18px 20px 16px;margin:6px 0 22px}
+.essentiel h2{margin:0 0 10px;font-size:1.05rem;font-weight:600;color:var(--amber)}
+.essentiel ol{margin:0;padding-left:1.2em;font-family:var(--serif);font-size:1.02rem;line-height:1.5}
+.essentiel li+li{margin-top:6px}
+.essentiel .meta{margin-top:12px;font-size:.85rem;opacity:.7}
+
+/* Rubriques */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin:0 -18px 14px;padding-left:18px;padding-right:18px;scrollbar-width:none;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5;padding-top:8px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex-shrink:0;border:1px solid var(--line);background:transparent;border-radius:999px;padding:7px 14px;font-weight:600;font-size:.95rem;white-space:nowrap}
+.tab[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab .n{font-weight:500;opacity:.6;margin-left:4px}
+
+section.rub{margin-bottom:28px}
+section.rub h3{font-size:1.35rem;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+section.rub h3::before{content:"";width:10px;height:10px;border-radius:2px;background:var(--c)}
+.rub-status{color:var(--muted);font-size:.9rem;margin:0 0 10px}
+.item{border-left:3px solid var(--c);background:var(--paper);padding:12px 14px 12px 14px;margin-bottom:10px;border-radius:0 10px 10px 0}
+.item.hi{border-left-width:6px}
+.item h4{margin:0 0 6px;font-size:1.12rem;line-height:1.2;font-weight:600}
+.item p{margin:0;font-family:var(--serif);font-size:.98rem;line-height:1.5;color:var(--ink)}
+.item .foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;font-size:.85rem;color:var(--muted)}
+.item a{color:var(--petrol);font-weight:600;text-decoration:none;white-space:nowrap}
+.item a:hover{text-decoration:underline}
+.flag{color:var(--amber);font-weight:700}
+
+.empty{background:var(--paper);border:1px dashed var(--line);border-radius:14px;padding:22px;text-align:center}
+.empty p{font-family:var(--serif);line-height:1.5;margin:0 0 14px}
+.btn{border:0;background:var(--petrol);color:#fff;border-radius:10px;padding:11px 18px;font-weight:600;font-size:1rem}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.err{color:var(--err);font-size:.92rem}
+.skel{height:78px;border-radius:0 10px 10px 0;border-left:3px solid var(--c);background:linear-gradient(90deg,var(--paper) 30%,var(--line) 50%,var(--paper) 70%);background-size:300% 100%;animation:sh 1.4s ease infinite;margin-bottom:10px;opacity:.7}
+@keyframes sh{from{background-position:100% 0}to{background-position:0 0}}
+
+/* Réglages */
+dialog{border:0;padding:0;width:min(640px,100%);max-height:100%;height:100%;margin:0 auto;background:var(--bg);color:var(--ink)}
+@media (min-width:700px){dialog{height:auto;max-height:90vh;margin-top:5vh;border-radius:16px}}
+dialog::backdrop{background:rgba(10,16,22,.5)}
+.dlg{padding:calc(env(safe-area-inset-top,0px) + 18px) 18px calc(env(safe-area-inset-bottom,0px) + 24px)}
+.dlg header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.dlg h2{margin:0;font-size:1.6rem}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 14px;background:var(--paper)}
+legend{font-weight:600;padding:0 6px}
+label{display:block;font-size:.9rem;color:var(--muted);margin:8px 0 4px}
+input[type=text],input[type=password],textarea,select{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:var(--bg)}
+textarea{min-height:74px;resize:vertical;font-family:var(--serif);font-size:.95rem;line-height:1.4}
+.rub-edit{border-top:1px solid var(--line);padding-top:10px;margin-top:10px}
+.rub-edit:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.row{display:flex;gap:8px;align-items:center}
+.row input[type=text]{flex:1}
+.hint{font-size:.85rem;color:var(--muted);font-family:var(--serif);line-height:1.45;margin:6px 0 0}
+.toggle{display:flex;align-items:center;gap:6px;font-size:.9rem;color:var(--ink);margin:0;white-space:nowrap}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.hist{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="day" id="day">aujourd'hui<small id="sub">Flash auto du matin</small></div>
+    <div class="tools">
+      <button class="icon-btn" id="btnShare" title="Partager le flash" aria-label="Partager le flash"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5"/></svg></button>
+      <button class="icon-btn" id="btnRefresh" title="Actualiser" aria-label="Actualiser"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7"/></svg></button>
+      <button class="icon-btn" id="btnSettings" title="Réglages" aria-label="Réglages"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    </div>
+  </header>
+
+  <div id="main"></div>
+</div>
+
+<dialog id="dlg">
+  <div class="dlg">
+    <header><h2>Réglages</h2><button class="btn ghost" id="btnClose">Fermer</button></header>
+
+    <fieldset>
+      <legend>Connexion</legend>
+      <label for="apiKey">Clé API Gemini</label>
+      <input type="password" id="apiKey" autocomplete="off" placeholder="AIza...">
+      <label for="model">Modèle</label>
+      <input type="text" id="model" placeholder="gemini-2.5-flash">
+      <p class="hint">La clé reste stockée uniquement sur ce téléphone. La recherche Google intégrée à Gemini sert à trouver l'actualité du jour.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Rubriques</legend>
+      <div id="rubList"></div>
+      <div class="actions"><button class="btn ghost" id="btnAddRub">Ajouter une rubrique</button></div>
+      <label for="nb">Nombre d'infos par rubrique</label>
+      <select id="nb"><option>3</option><option>4</option><option>5</option><option>6</option></select>
+      <label for="focus">Contexte à prendre en compte</label>
+      <textarea id="focus"></textarea>
+      <p class="hint">Sert à trier et hiérarchiser l'info (ce qui compte pour toi passe en tête et est signalé).</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Historique</legend>
+      <div class="hist" id="hist"></div>
+      <p class="hint">Les 7 derniers flashs restent consultables hors connexion.</p>
+    </fieldset>
+
+    <div class="actions">
+      <button class="btn" id="btnSave">Enregistrer</button>
+      <button class="btn ghost" id="btnReset">Rubriques par défaut</button>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(() => {
+  "use strict";
+  const LS = {
+    get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch{ return d; } },
+    set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} },
+    del(k){ try{ localStorage.removeItem(k); }catch{} }
+  };
+
+  const DEFAULT_RUBS = [
+    { id:"constructeurs", nom:"Constructeurs", actif:true,
+      consigne:"Mercedes-Benz en priorité (gamme, lancements, résultats, stratégie, réseau France, modèle d'agence), puis BMW, Audi, Volvo, Tesla, BYD, Stellantis et autres concurrents premium." },
+    { id:"marche", nom:"Marché France", actif:true,
+      consigne:"Immatriculations VN (chiffres PFA, AAA Data), marché VO, part de l'électrique et des hybrides, prix et remises, tendances de la demande particuliers et flottes." },
+    { id:"reglementation", nom:"Réglementation", actif:true,
+      consigne:"Bonus/malus, malus au poids, leasing social, ZFE, normes européennes CO2/CAFE, fiscalité des flottes (AEN, taxes annuelles), primes et certificats d'économie d'énergie." },
+    { id:"distribution", nom:"Distribution", actif:true,
+      consigne:"Rachats et consolidation des groupes de distribution, résultats des grands distributeurs, contrats de distribution et d'agent, digitalisation de la vente, après-vente, métiers et recrutement en concession." }
+  ];
+  const DEFAULT_FOCUS = "Je dirige trois concessions Mercedes-Benz en Alsace (VN, VO, après-vente, pièces, carrosserie). Mets en avant ce qui a un impact concret sur un distributeur Mercedes en France.";
+
+  let cfg = LS.get("fa.cfg", null) || { key:"", model:"gemini-2.5-flash", nb:4, focus:DEFAULT_FOCUS, rubs:DEFAULT_RUBS };
+  let hist = LS.get("fa.hist", {});   // { "2026-09-24": brief }
+  let viewDate = todayKey();
+  let busy = false;
+  let active = "all";
+
+  const $ = s => document.querySelector(s);
+  const main = $("#main");
+
+  function todayKey(){ const d = new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function fmtDay(k){
+    const [y,m,d] = k.split("-").map(Number); const dt = new Date(y, m-1, d);
+    return { day: dt.toLocaleDateString("fr-FR",{weekday:"long"}), full: dt.toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"}) };
+  }
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const colorFor = i => `var(--r${(i % 6) + 1})`;
+
+  /* ---------- Appel Gemini avec recherche Google ---------- */
+  async function gemini(prompt, useSearch){
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(cfg.model || "gemini-2.5-flash")}:generateContent?key=${encodeURIComponent(cfg.key)}`;
+    const body = { contents:[{ role:"user", parts:[{ text: prompt }] }], generationConfig:{ temperature:0.3 } };
+    if (useSearch) body.tools = [{ google_search:{} }];
+    const r = await fetch(url, { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data?.error?.message || ("Erreur " + r.status));
+    const cand = data?.candidates?.[0];
+    const text = (cand?.content?.parts || []).map(p => p.text || "").join("");
+    const sources = (cand?.groundingMetadata?.groundingChunks || []).map(c => c.web).filter(Boolean);
+    if (!text.trim()) throw new Error("Réponse vide du modèle");
+    return { text, sources };
+  }
+  function parseJSON(text){
+    const clean = text.replace(/```json|```/g, "").trim();
+    try { return JSON.parse(clean); } catch {}
+    const a = clean.indexOf("["), b = clean.lastIndexOf("]");
+    if (a >= 0 && b > a) return JSON.parse(clean.slice(a, b + 1));
+    const c = clean.indexOf("{"), d = clean.lastIndexOf("}");
+    if (c >= 0 && d > c) return JSON.parse(clean.slice(c, d + 1));
+    throw new Error("Format de réponse illisible");
+  }
+
+  function rubPrompt(rub){
+    const dateTxt = new Date().toLocaleDateString("fr-FR",{weekday:"long", day:"numeric", month:"long", year:"numeric"});
+    return `Nous sommes le ${dateTxt}. Tu prépares le flash d'actualité automobile du matin d'un directeur de concessions.
+Contexte du lecteur : ${cfg.focus}
+Rubrique : ${rub.nom}
+Périmètre : ${rub.consigne}
+
+Recherche sur le web les actualités publiées ces dernières 48 heures (72 heures maximum si l'actualité est creuse), en priorité dans la presse française spécialisée (Journal de l'Automobile, Autoplus, L'Argus, Kidioui, Autoactu, Flottes Automobiles, Décision Atelier, Les Echos, etc.) et les communiqués officiels.
+Sélectionne les ${cfg.nb} informations les plus utiles, sans doublon, du plus important au moins important. N'invente rien : si tu trouves moins d'informations fiables, renvoie-en moins.
+
+Réponds UNIQUEMENT avec un tableau JSON, sans texte autour, au format :
+[{"titre":"titre court et factuel","resume":"2 phrases maximum en français, avec les chiffres clés","source":"nom du média","url":"lien de l'article si tu l'as, sinon chaîne vide","date":"JJ/MM","important":true ou false}]
+"important" vaut true seulement si l'information a un impact direct pour un distributeur Mercedes-Benz en France.`;
+  }
+
+  async function fetchRub(rub){
+    const { text, sources } = await gemini(rubPrompt(rub), true);
+    let items = parseJSON(text);
+    if (!Array.isArray(items)) items = items.items || [];
+    return items.slice(0, cfg.nb + 1).map(it => ({
+      titre: String(it.titre || "").trim(),
+      resume: String(it.resume || "").trim(),
+      source: String(it.source || "").trim(),
+      url: /^https?:\/\//.test(it.url || "") ? it.url : "",
+      date: String(it.date || "").trim(),
+      important: !!it.important
+    })).filter(it => it.titre);
+  }
+
+  async function fetchEssentiel(brief){
+    const lignes = brief.rubs.flatMap(r => (r.items || []).map(it => `[${r.nom}] ${it.titre} : ${it.resume}`)).join("\n");
+    if (!lignes) return [];
+    const p = `Voici les actualités automobiles du jour :\n${lignes}\n\nContexte du lecteur : ${cfg.focus}\n\nRédige les 3 points à retenir en priorité pour ce lecteur, une phrase chacun, en français, factuels et sans formule creuse. Réponds UNIQUEMENT avec un tableau JSON de 3 chaînes.`;
+    const { text } = await gemini(p, false);
+    const arr = parseJSON(text);
+    return Array.isArray(arr) ? arr.map(String).slice(0, 3) : [];
+  }
+
+  async function generate(){
+    if (busy) return;
+    if (!cfg.key){ openSettings(); return; }
+    busy = true; viewDate = todayKey(); setRefreshing(true);
+    const rubs = cfg.rubs.filter(r => r.actif);
+    const brief = { date: todayKey(), at: Date.now(), essentiel: [], rubs: rubs.map(r => ({ id:r.id, nom:r.nom, items:null, error:null })) };
+    renderBrief(brief, true);
+    await Promise.all(rubs.map(async (r, i) => {
+      try { brief.rubs[i].items = await fetchRub(r); }
+      catch(e){ brief.rubs[i].items = []; brief.rubs[i].error = e.message; }
+      renderBrief(brief, true);
+    }));
+    try { brief.essentiel = await fetchEssentiel(brief); } catch(e){ brief.essentiel = []; }
+    hist[brief.date] = brief;
+    const keys = Object.keys(hist).sort().reverse();
+    keys.slice(7).forEach(k => delete hist[k]);
+    LS.set("fa.hist", hist);
+    busy = false; setRefreshing(false);
+    renderBrief(brief, false);
+  }
+
+  function setRefreshing(on){ const b = $("#btnRefresh"); b.disabled = on; b.classList.toggle("spin", on); }
+
+  /* ---------- Rendu ---------- */
+  function renderHead(k){
+    const f = fmtDay(k);
+    $("#day").innerHTML = `${esc(f.day)}<small id="sub">${esc(f.full)}${k !== todayKey() ? " · archive" : ""}</small>`;
+  }
+
+  function renderBrief(brief, loading){
+    renderHead(brief.date);
+    let html = "";
+    if (brief.essentiel && brief.essentiel.length){
+      const h = new Date(brief.at).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"});
+      html += `<div class="essentiel"><h2>À retenir ce matin</h2><ol>${brief.essentiel.map(e => `<li>${esc(e)}</li>`).join("")}</ol><div class="meta">Généré à ${h}</div></div>`;
+    } else if (loading){
+      html += `<div class="essentiel"><h2>À retenir ce matin</h2><ol><li>Recherche de l'actualité en cours…</li></ol></div>`;
+    }
+    const counts = brief.rubs.map(r => (r.items || []).length);
+    html += `<nav class="tabs" aria-label="Rubriques"><button class="tab" data-f="all" aria-pressed="${active==="all"}">Tout</button>` +
+      brief.rubs.map((r,i) => `<button class="tab" data-f="${esc(r.id)}" aria-pressed="${active===r.id}">${esc(r.nom)}<span class="n">${r.items ? counts[i] : "…"}</span></button>`).join("") + `</nav>`;
+    brief.rubs.forEach((r, i) => {
+      if (active !== "all" && active !== r.id) return;
+      const c = colorFor(i);
+      html += `<section class="rub" style="--c:${c}"><h3>${esc(r.nom)}</h3>`;
+      if (r.items === null){
+        html += `<p class="rub-status">Recherche en cours…</p><div class="skel"></div><div class="skel"></div>`;
+      } else if (r.error){
+        html += `<p class="err">Rubrique non chargée : ${esc(r.error)}</p>`;
+      } else if (!r.items.length){
+        html += `<p class="rub-status">Rien de notable sur les dernières 48 heures.</p>`;
+      } else {
+        html += r.items.map(it => {
+          const link = it.url || ("https://www.google.com/search?tbm=nws&q=" + encodeURIComponent(it.titre));
+          return `<article class="item${it.important ? " hi" : ""}">
+            <h4>${esc(it.titre)}</h4><p>${esc(it.resume)}</p>
+            <div class="foot"><span>${it.important ? `<span class="flag">Impact direct</span> · ` : ""}${esc(it.source)}${it.date ? " · " + esc(it.date) : ""}</span>
+            <a href="${esc(link)}" target="_blank" rel="noopener">${it.url ? "Lire" : "Chercher"}</a></div></article>`;
+        }).join("");
+      }
+      html += `</section>`;
+    });
+    main.innerHTML = html;
+    main.querySelectorAll(".tab").forEach(b => b.onclick = () => { active = b.dataset.f; renderBrief(brief, loading); });
+  }
+
+  function renderEmpty(){
+    renderHead(todayKey());
+    main.innerHTML = cfg.key
+      ? `<div class="empty"><p>Le flash du jour n'a pas encore été préparé.</p><button class="btn" id="goGen">Préparer le flash</button></div>`
+      : `<div class="empty"><p>Pour commencer, colle ta clé API Gemini dans les réglages. Ensuite, le flash se prépare tout seul à la première ouverture de chaque matin.</p><button class="btn" id="goSet">Ouvrir les réglages</button></div>`;
+    const g = $("#goGen"); if (g) g.onclick = generate;
+    const s = $("#goSet"); if (s) s.onclick = openSettings;
+  }
+
+  function show(k){
+    viewDate = k;
+    const b = hist[k];
+    if (b) renderBrief(b, false); else renderEmpty();
+  }
+
+  /* ---------- Partage ---------- */
+  function briefText(b){
+    const f = fmtDay(b.date);
+    let t = `Flash auto du ${f.day} ${f.full}\n\n`;
+    if (b.essentiel?.length) t += "À retenir :\n" + b.essentiel.map((e,i) => `${i+1}. ${e}`).join("\n") + "\n\n";
+    b.rubs.forEach(r => {
+      if (!r.items?.length) return;
+      t += r.nom.toUpperCase() + "\n" + r.items.map(it => `- ${it.titre} (${it.source}) : ${it.resume}${it.url ? "\n  " + it.url : ""}`).join("\n") + "\n\n";
+    });
+    return t.trim();
+  }
+  $("#btnShare").onclick = async () => {
+    const b = hist[viewDate]; if (!b) return;
+    const text = briefText(b);
+    try {
+      if (navigator.share) await navigator.share({ title:"Flash auto", text });
+      else { await navigator.clipboard.writeText(text); alert("Flash copié dans le presse-papiers."); }
+    } catch {}
+  };
+
+  /* ---------- Réglages ---------- */
+  const dlg = $("#dlg");
+  function rubRow(r, i){
+    return `<div class="rub-edit" data-i="${i}">
+      <div class="row"><input type="text" class="r-nom" value="${esc(r.nom)}" aria-label="Nom de la rubrique">
+      <label class="toggle"><input type="checkbox" class="r-act" ${r.actif ? "checked" : ""}> Active</label>
+      <button class="btn ghost r-del" style="padding:7px 10px" aria-label="Supprimer la rubrique">Suppr.</button></div>
+      <label>Ce que tu veux suivre</label><textarea class="r-cons">${esc(r.consigne)}</textarea></div>`;
+  }
+  function fillSettings(){
+    $("#apiKey").value = cfg.key || "";
+    $("#model").value = cfg.model || "gemini-2.5-flash";
+    $("#nb").value = String(cfg.nb || 4);
+    $("#focus").value = cfg.focus || "";
+    $("#rubList").innerHTML = cfg.rubs.map(rubRow).join("");
+    $("#rubList").querySelectorAll(".r-del").forEach(b => b.onclick = () => { readSettings(false); cfg.rubs.splice(+b.closest(".rub-edit").dataset.i, 1); fillSettings(); });
+    const keys = Object.keys(hist).sort().reverse();
+    $("#hist").innerHTML = keys.length ? keys.map(k => `<button class="tab" data-k="${k}" aria-pressed="${k===viewDate}">${esc(fmtDay(k).full)}</button>`).join("") : `<span class="hint">Aucun flash enregistré pour l'instant.</span>`;
+    $("#hist").querySelectorAll("[data-k]").forEach(b => b.onclick = () => { dlg.close(); active = "all"; show(b.dataset.k); });
+  }
+  function readSettings(persist){
+    cfg.key = $("#apiKey").value.trim();
+    cfg.model = $("#model").value.trim() || "gemini-2.5-flash";
+    cfg.nb = parseInt($("#nb").value, 10) || 4;
+    cfg.focus = $("#focus").value.trim();
+    cfg.rubs = [...document.querySelectorAll(".rub-edit")].map((el, i) => ({
+      id: (cfg.rubs[i] && cfg.rubs[i].id) || ("rub" + Date.now() + i),
+      nom: el.querySelector(".r-nom").value.trim() || "Rubrique",
+      consigne: el.querySelector(".r-cons").value.trim(),
+      actif: el.querySelector(".r-act").checked
+    }));
+    if (persist) LS.set("fa.cfg", cfg);
+  }
+  function openSettings(){ fillSettings(); dlg.showModal(); }
+  $("#btnSettings").onclick = openSettings;
+  $("#btnClose").onclick = () => dlg.close();
+  $("#btnAddRub").onclick = () => { readSettings(false); cfg.rubs.push({ id:"rub"+Date.now(), nom:"Nouvelle rubrique", consigne:"", actif:true }); fillSettings(); };
+  $("#btnReset").onclick = () => { readSettings(false); cfg.rubs = JSON.parse(JSON.stringify(DEFAULT_RUBS)); cfg.focus = DEFAULT_FOCUS; fillSettings(); };
+  $("#btnSave").onclick = () => {
+    readSettings(true); dlg.close();
+    if (!hist[todayKey()] && cfg.key) generate(); else show(viewDate);
+  };
+  $("#btnRefresh").onclick = generate;
+
+  /* ---------- Démarrage : génération automatique une fois par jour ---------- */
+  function boot(){
+    if (hist[todayKey()]) show(todayKey());
+    else if (cfg.key) generate();
+    else renderEmpty();
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && !busy && cfg.key && !hist[todayKey()]) generate();
+  });
+  boot();
+})();
+</script>
+</body>
+</html>
